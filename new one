@@ -1,0 +1,55 @@
+-- Blox Fruits: Fruit Detection and Server Hopping Script
+
+local desiredFruits = {"T-Rex", "Leopard", "Kitsune", "Dragon"} -- List of fruits you want to detect
+
+-- Function to check if the fruit is in the desired list
+local function isDesiredFruit(fruitName)
+    for _, fruit in pairs(desiredFruits) do
+        if fruitName == fruit then
+            return true
+        end
+    end
+    return false
+end
+
+-- Example function that handles detected fruits
+local function onFruitDetected(fruitName)
+    if isDesiredFruit(fruitName) then
+        print("Desired fruit found: " .. fruitName)
+        -- Implement the actions you want to take, e.g., teleport to fruit
+        -- For example: TeleportService:Teleport(placeId)
+    else
+        print("Fruit not desired: " .. fruitName)
+    end
+end
+
+-- Function to hop servers (improved with delay and avoiding same server)
+local function hopServers()
+    local TeleportService = game:GetService("TeleportService")
+    local currentPlaceId = game.PlaceId
+    local player = game.Players.LocalPlayer
+
+    -- Avoid rejoining the same server
+    local currentServerId = game.GameId
+    print("Current server ID: " .. currentServerId)
+
+    -- Randomly delay the teleportation process (helps avoid rejoining same server)
+    wait(5)  -- Adjust delay as needed (in seconds)
+
+    -- Hop to a different server
+    print("Hopping to another server...")
+    TeleportService:Teleport(currentPlaceId, player)
+
+    -- Check if the server hop was successful before attempting again
+    -- Delay to let the new server load
+    wait(10)  -- Adjust this delay to match the server load time
+end
+
+-- Simulate fruit detection (replace with actual game logic)
+local fruitsInGame = {"T-Rex", "Dough", "Leopard", "Dragon", "Magma"} -- Example fruits in the game
+for _, fruit in pairs(fruitsInGame) do
+    onFruitDetected(fruit)
+end
+
+-- Example: Hop servers after fruit detection
+hopServers()

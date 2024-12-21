@@ -103,8 +103,8 @@ end
 -- Simulate fruit detection (replace with actual game logic)
 local fruitsInGame = {"T-Rex", "Dough", "Leopard", "Dragon", "Magma"} -- Example fruits in the game
 for _, fruit in pairs(fruitsInGame) do
-    -- Random position for example; replace this with actual positions of the fruit
-    local fruitPosition = Vector3.new(math.random(-500, 500), 50, math.random(-500, 500))
+    -- Adjust the position for testing or use real fruit spawn logic
+    local fruitPosition = Vector3.new(4000, 100, 5000) -- Example position for the fruit in the Third Sea (adjust as needed)
     onFruitDetected(fruit, fruitPosition)
 end
 

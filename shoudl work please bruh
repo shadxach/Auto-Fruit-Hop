@@ -1,0 +1,114 @@
+-- Blox Fruits: Fruit Detection, Teleportation, and Server Hopping
+
+local desiredFruits = {"T-Rex", "Leopard", "Kitsune", "Dragon"} -- List of fruits you want to detect
+local fruitFound = false -- Flag to track whether the desired fruit has been found
+
+-- Function to check if the fruit is in the desired list
+local function isDesiredFruit(fruitName)
+    for _, fruit in pairs(desiredFruits) do
+        if fruitName == fruit then
+            return true
+        end
+    end
+    return false
+end
+
+-- Function to display messages on the screen
+local function showMessage(message)
+    local gui = Instance.new("ScreenGui")
+    local textLabel = Instance.new("TextLabel")
+
+    gui.Parent = game.CoreGui
+    textLabel.Parent = gui
+    textLabel.Text = message
+    textLabel.Size = UDim2.new(0, 500, 0, 50)
+    textLabel.Position = UDim2.new(0.5, -250, 0.1, 0)
+    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    textLabel.BackgroundTransparency = 0.5
+    textLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+
+    wait(5) -- Show the message for 5 seconds
+    gui:Destroy() -- Remove the message
+end
+
+-- Function to smoothly teleport using Tweening
+local function teleportToFruit(fruitPosition)
+    local character = game.Players.LocalPlayer.Character
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+    -- Create a TweenService instance
+    local TweenService = game:GetService("TweenService")
+
+    -- Define the tween info (time, easing style)
+    local tweenInfo = TweenInfo.new(
+        2, -- Time to complete the movement (in seconds)
+        Enum.EasingStyle.Sine, -- Easing style for smooth transition
+        Enum.EasingDirection.Out, -- Easing direction
+        0, -- Repeat count (0 means no repetition)
+        false, -- Reverses the tween after completing (false to not reverse)
+        0 -- Delay before starting the tween
+    )
+
+    -- Define the goal position for the tween
+    local goal = {CFrame = CFrame.new(fruitPosition)}
+
+    -- Create the tween
+    local tween = TweenService:Create(humanoidRootPart, tweenInfo, goal)
+
+    -- Play the tween to move the player smoothly to the fruit's position
+    tween:Play()
+end
+
+-- Example function that handles detected fruits
+local function onFruitDetected(fruitName, fruitPosition)
+    if isDesiredFruit(fruitName) then
+        if not fruitFound then
+            showMessage("Fruit found! Getting fruit...")
+            print("Desired fruit found: " .. fruitName)
+            fruitFound = true -- Set fruitFound flag to true to stop further checks
+
+            -- Teleport smoothly to the fruit using tweening
+            teleportToFruit(fruitPosition)
+            print("Teleporting to fruit at: " .. tostring(fruitPosition))
+        end
+    else
+        if not fruitFound then
+            showMessage("Your fruit is not found, hopping server...")
+            print("Fruit not desired: " .. fruitName)
+        end
+    end
+end
+
+-- Function to hop servers (improved with delay and avoiding same server)
+local function hopServers()
+    local TeleportService = game:GetService("TeleportService")
+    local currentPlaceId = game.PlaceId
+    local player = game.Players.LocalPlayer
+
+    -- Get the current server ID to avoid rejoining the same server
+    local currentServerId = game.GameId
+    print("Current server ID: " .. currentServerId)
+
+    -- Add a random delay to help avoid rejoining the same server
+    wait(5)  -- Adjust delay as needed (in seconds)
+
+    -- Hop to a different server (use currentPlaceId to teleport within the same game)
+    print("Hopping to another server...")
+    TeleportService:Teleport(currentPlaceId, player)
+
+    -- Wait to ensure the server has fully loaded
+    wait(10)  -- Adjust this delay to match the server load time
+end
+
+-- Simulate fruit detection (replace with actual game logic)
+local fruitsInGame = {"T-Rex", "Dough", "Leopard", "Dragon", "Magma"} -- Example fruits in the game
+for _, fruit in pairs(fruitsInGame) do
+    -- Random position for example; replace this with actual positions of the fruit
+    local fruitPosition = Vector3.new(math.random(-500, 500), 50, math.random(-500, 500))
+    onFruitDetected(fruit, fruitPosition)
+end
+
+-- Example: Hop servers after fruit detection if fruit is not found
+if not fruitFound then
+    hopServers()
+end

@@ -31,32 +31,20 @@ local function showMessage(message)
     gui:Destroy() -- Remove the message
 end
 
--- Function to smoothly teleport using Tweening
+-- Function to teleport to the fruit’s position
 local function teleportToFruit(fruitPosition)
     local character = game.Players.LocalPlayer.Character
+    if not character then return end
     local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
-    -- Create a TweenService instance
-    local TweenService = game:GetService("TweenService")
-
-    -- Define the tween info (time, easing style)
-    local tweenInfo = TweenInfo.new(
-        2, -- Time to complete the movement (in seconds)
-        Enum.EasingStyle.Sine, -- Easing style for smooth transition
-        Enum.EasingDirection.Out, -- Easing direction
-        0, -- Repeat count (0 means no repetition)
-        false, -- Reverses the tween after completing (false to not reverse)
-        0 -- Delay before starting the tween
-    )
-
-    -- Define the goal position for the tween
-    local goal = {CFrame = CFrame.new(fruitPosition)}
-
-    -- Create the tween
-    local tween = TweenService:Create(humanoidRootPart, tweenInfo, goal)
-
-    -- Play the tween to move the player smoothly to the fruit's position
-    tween:Play()
+    -- Check if fruit position is valid
+    if fruitPosition and typeof(fruitPosition) == "Vector3" then
+        -- Teleport the player to the fruit’s position
+        humanoidRootPart.CFrame = CFrame.new(fruitPosition)
+        print("Teleporting to fruit at: " .. tostring(fruitPosition))
+    else
+        print("Invalid fruit position detected.")
+    end
 end
 
 -- Example function that handles detected fruits
@@ -67,9 +55,8 @@ local function onFruitDetected(fruitName, fruitPosition)
             print("Desired fruit found: " .. fruitName)
             fruitFound = true -- Set fruitFound flag to true to stop further checks
 
-            -- Teleport smoothly to the fruit using tweening
+            -- Teleport to the fruit
             teleportToFruit(fruitPosition)
-            print("Teleporting to fruit at: " .. tostring(fruitPosition))
         end
     else
         if not fruitFound then

@@ -1,117 +1,44 @@
--- Blox Fruits: Mythical Fruit Detection, Teleportation, and Server Hopping
+-- Auto-Hop Script for Blox Fruits with Server Filtering
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+local PlaceId = game.PlaceId -- Current game's PlaceId
+local hopInterval = 30 -- Time in seconds between hops
+local running = true
 
-local desiredFruits = {"T-Rex", "Leopard", "Kitsune", "Dragon"} -- Only detect these mythical fruits
-local fruitFound = false -- Flag to track whether the desired fruit has been found
+-- Function to fetch server list
+local function getServerList()
+    local cursor = ""
+    local servers = {}
+    repeat
+        local url = "https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100&cursor=" .. cursor
+        local response = HttpService:GetAsync(url)
+        local data = HttpService:JSONDecode(response)
+        for _, server in pairs(data.data) do
+            if server.playing < server.maxPlayers then
+                table.insert(servers, server.id)
+            end
+        end
+        cursor = data.nextPageCursor
+    until not cursor
+    return servers
+end
 
--- Blacklist: Fruits that should not be considered
-local blacklist = {
-    "GravityFruit", "MammothFruit", "DoughFruit", "ShadowFruit", "VenomFruit", "ControlFruit",
-    "GasFruit", "SpiritFruit", "QuakeFruit", "BuddhaFruit", "LoveFruit", "SpiderFruit", "SoundFruit",
-    "PhoenixFruit", "PortalFruit", "RumbleFruit", "PainFruit", "BlizzardFruit", "LightFruit",
-    "RubberFruit", "BarrierFruit", "GhostFruit", "MagmaFruit", "FlameFruit", "FalconFruit",
-    "IceFruit", "SandFruit", "DarkFruit", "DiamondFruit", "RocketFruit", "SpinFruit", "BladeFruit",
-    "SpringFruit", "BombFruit", "SmokeFruit", "SpikeFruit"
-}
-
--- Function to check if the fruit is in the desired list (mythical fruits)
-local function isDesiredFruit(fruitName)
-    for _, fruit in pairs(desiredFruits) do
-        if fruitName == fruit then
-            return true
+-- Function to hop to a different server
+local function hopServer()
+    local currentJobId = game.JobId -- Current server ID
+    local servers = getServerList()
+    for _, serverId in ipairs(servers) do
+        if serverId ~= currentJobId then
+            print("Hopping to a new server...")
+            TeleportService:TeleportToPlaceInstance(PlaceId, serverId)
+            return
         end
     end
-    return false
+    print("No new servers found. Retrying...")
 end
 
--- Function to check if the fruit is blacklisted
-local function isBlacklisted(fruitName)
-    for _, fruit in pairs(blacklist) do
-        if fruitName == fruit then
-            return true
-        end
-    end
-    return false
-end
-
--- Function to display messages on the screen
-local function showMessage(message)
-    local gui = Instance.new("ScreenGui")
-    local textLabel = Instance.new("TextLabel")
-
-    gui.Parent = game.CoreGui
-    textLabel.Parent = gui
-    textLabel.Text = message
-    textLabel.Size = UDim2.new(0, 500, 0, 50)
-    textLabel.Position = UDim2.new(0.5, -250, 0.1, 0)
-    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    textLabel.BackgroundTransparency = 0.5
-    textLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-
-    wait(5) -- Show the message for 5 seconds
-    gui:Destroy() -- Remove the message
-end
-
--- Function to teleport to the fruit’s position
-local function teleportToFruit(fruitPosition)
-    local character = game.Players.LocalPlayer.Character
-    if not character then return end
-    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-
-    -- Teleport the player to the fruit’s position using CFrame
-    if fruitPosition and typeof(fruitPosition) == "Vector3" then
-        humanoidRootPart.CFrame = CFrame.new(fruitPosition)
-        print("Teleporting to fruit at: " .. tostring(fruitPosition))
-    else
-        print("Invalid fruit position detected.")
-    end
-end
-
--- Function to hop servers
-local function hopServers()
-    local TeleportService = game:GetService("TeleportService")
-    local currentPlaceId = game.PlaceId
-    local player = game.Players.LocalPlayer
-
-    -- Get the current server ID to avoid rejoining the same server
-    local currentServerId = game.GameId
-    print("Current server ID: " .. currentServerId)
-
-    -- Hop to a different server (use currentPlaceId to teleport within the same game)
-    print("Hopping to another server...")
-    TeleportService:Teleport(currentPlaceId, player)
-
-    -- Wait to ensure the server has fully loaded
-    wait(10)  -- Adjust this delay to match the server load time
-end
-
--- Example function that handles detected fruits
-local function onFruitDetected(fruitName, fruitPosition)
-    if isDesiredFruit(fruitName) and not isBlacklisted(fruitName) then
-        if not fruitFound then
-            showMessage("Fruit found! Getting fruit...")
-            print("Desired fruit found: " .. fruitName)
-            fruitFound = true -- Set fruitFound flag to true to stop further checks
-
-            -- Teleport to the fruit
-            teleportToFruit(fruitPosition)
-        end
-    else
-        if not fruitFound then
-            showMessage("Your fruit is not found, hopping server...")
-            print("Fruit not desired: " .. fruitName)
-        end
-    end
-end
-
--- Simulate fruit detection (replace with actual game logic)
-local fruitsInGame = {"T-Rex", "Dough", "Leopard", "Dragon", "Magma"} -- Example fruits in the game
-for _, fruit in pairs(fruitsInGame) do
-    -- Adjust the position for testing or use real fruit spawn logic
-    local fruitPosition = Vector3.new(4000, 100, 5000) -- Example position for the fruit in the Third Sea (adjust as needed)
-    onFruitDetected(fruit, fruitPosition)
-end
-
--- Example: Hop servers after fruit detection if fruit is not found
-if not fruitFound then
-    hopServers()
+-- Main loop
+while running do
+    hopServer() -- Perform server hop
+    wait(hopInterval) -- Wait 30 seconds before the next hop
 end

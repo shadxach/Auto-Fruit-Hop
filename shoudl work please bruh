@@ -1,44 +1,49 @@
--- Auto-Hop Script for Blox Fruits with Server Filtering
+-- Auto-Hop Script for Blox Fruits (Updated Version)
 local HttpService = game:GetService("HttpService")
 local TeleportService = game:GetService("TeleportService")
-local PlaceId = game.PlaceId -- Current game's PlaceId
+local PlaceId = game.PlaceId -- Blox Fruits Game PlaceId
 local hopInterval = 30 -- Time in seconds between hops
-local running = true
 
 -- Function to fetch server list
 local function getServerList()
-    local cursor = ""
     local servers = {}
+    local cursor = ""
     repeat
         local url = "https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100&cursor=" .. cursor
-        local response = HttpService:GetAsync(url)
-        local data = HttpService:JSONDecode(response)
-        for _, server in pairs(data.data) do
-            if server.playing < server.maxPlayers then
-                table.insert(servers, server.id)
+        local success, response = pcall(function()
+            return HttpService:GetAsync(url)
+        end)
+
+        if success then
+            local data = HttpService:JSONDecode(response)
+            for _, server in pairs(data.data) do
+                if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                    table.insert(servers, server.id)
+                end
             end
+            cursor = data.nextPageCursor
+        else
+            print("Failed to fetch server list. Retrying...")
+            break
         end
-        cursor = data.nextPageCursor
     until not cursor
     return servers
 end
 
--- Function to hop to a different server
+-- Function to hop to a new server
 local function hopServer()
-    local currentJobId = game.JobId -- Current server ID
     local servers = getServerList()
-    for _, serverId in ipairs(servers) do
-        if serverId ~= currentJobId then
-            print("Hopping to a new server...")
-            TeleportService:TeleportToPlaceInstance(PlaceId, serverId)
-            return
-        end
+    if #servers > 0 then
+        local serverId = servers[math.random(1, #servers)] -- Select a random server
+        print("Hopping to a new server: " .. serverId)
+        TeleportService:TeleportToPlaceInstance(PlaceId, serverId)
+    else
+        print("No new servers found. Retrying in " .. hopInterval .. " seconds...")
     end
-    print("No new servers found. Retrying...")
 end
 
 -- Main loop
-while running do
-    hopServer() -- Perform server hop
-    wait(hopInterval) -- Wait 30 seconds before the next hop
+while true do
+    hopServer()
+    wait(hopInterval) -- Wait before hopping again
 end

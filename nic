@@ -1,1 +1,28 @@
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
+-- Your game's place ID
+local placeId = game.PlaceId
+
+-- Function to find a new server
+local function findNewServer()
+    local servers = {} -- Replace with a list of job IDs or fetch from an API.
+    local newServerId = servers[math.random(1, #servers)]
+    return newServerId
+end
+
+-- Server hop logic
+local function serverHop()
+    local newServerId = findNewServer()
+    if newServerId then
+        TeleportService:TeleportToPlaceInstance(placeId, newServerId, player)
+    else
+        warn("No new server found!")
+    end
+end
+
+-- Timer for auto server hopping
+while task.wait(50) do
+    serverHop()
+end

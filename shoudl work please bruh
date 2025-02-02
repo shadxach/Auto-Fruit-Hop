@@ -1,49 +1,56 @@
--- Auto-Hop Script for Blox Fruits (Updated Version)
-local HttpService = game:GetService("HttpService")
-local TeleportService = game:GetService("TeleportService")
-local PlaceId = game.PlaceId -- Blox Fruits Game PlaceId
-local hopInterval = 30 -- Time in seconds between hops
+script_key = "script_key = "DdaudYxyTsRICzhiXZNKZsxbTOAreucY";  _G["HoHo Hub Auto Bounty V4"] = {     ["Avatar"] = "rbxassetid://8598068647",     ["Farm Method"] = "Normal", -- Normal or Gun (really Bad rn)     ["Select Team"] = "Pirate", -- Pirate/Marine     ["Discord Webhook"] = "",     ["Bypass Teleport"] = false, -- not recommend cuz the bypass success rate is low     ["Max Level Distance"] = 612, -- 612 is took from wiki but u can change it     ["Don't attack friends"] = true,     ["Don't attack player have cup"] = false,     ["Distance Attack Y"] = 2, -- Shark Race = 0; Another >= 6     ["Chat After Kill"] = {         ["Active"] = true, -- if u don't want script chat just make it false         ["List Chat"] = {"i have a good gaming chair","No skill? Use Hoho hub","How to play this game","im new","your bad"},     },     ["Yourself"] = {         ["Invisible From Ken"] = true,         ["No Stun"] = true,     },     ["SafeZone"] = {Enabled = true, ["Health Left (%)"] = 25, ["Wait Until Heal (%)"] = 80},     ["Time Control"] = {         ["Max Time Target Player"] = 120,     },     ["Abilities"] = {         ["Auto Click"] = true,         ["Melee"] = {             Z = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},             X = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},             C = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},         },         ["Sword"] = {             Z = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},             X = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},         },         ["Gun"] = {             Z = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},             X = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},         },         ["Fruit"] = {             Z = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},             X = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},             C = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},             V = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6}, -- don't forget to disable V if u r using zoan fruits             F = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},         },     }, } _G.SupperFixLag = true -- eww potato device _G["Auto Gacha & Store Fruit"] = true -- more fruits ^^  loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/fac6dbd013c78163f8061ce11b2c1330.lua"))()";
 
--- Function to fetch server list
-local function getServerList()
-    local servers = {}
-    local cursor = ""
-    repeat
-        local url = "https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100&cursor=" .. cursor
-        local success, response = pcall(function()
-            return HttpService:GetAsync(url)
-        end)
+_G["HoHo Hub Auto Bounty V4"] = {
+    ["Avatar"] = "https://www.roblox.com/users/4621773729/profile",
+    ["Farm Method"] = "Normal",
+    ["Select Team"] = "Marine",
+    ["Discord Webhook"] = "https://discord.com/api/webhooks/1065489735621021696/FEh5BwIE1rHGD3Gms1zPEaok6eHgyEYShCe6AsjXhjaR__rbQaZB6PBSs9bUuMtDo6Pa",
+    ["Bypass Teleport"] = false,
+    ["Max Level Distance"] = 612,
+    ["Don't attack friends"] = true,
+    ["Don't attack player have cup"] = false,
+    ["Distance Attack Y"] = 2,
+    ["Chat After Kill"] = {
+        ["Active"] = false,
+        ["List Chat"] = {"i have a good gaming chair","No skill? Use Hoho hub","How to play this game","im new","your bad"},
+    },
+    ["Yourself"] = {
+        ["Invisible From Ken"] = true,
+        ["No Stun"] = true,
+    },
+    ["SafeZone"] = {
+        Enabled = true,
+        ["Health Left (%)"] = 25,
+        ["Wait Until Heal (%)"] = 80,
+    },
+    ["Time Control"] = {
+        ["Max Time Target Player"] = 120,
+    },
+    ["Abilities"] = {
+        ["Auto Click"] = true,
+        ["Melee"] = {
+            Z = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},
+            X = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},
+            C = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},
+        },
+        ["Sword"] = {
+            Z = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},
+            X = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},
+        },
+        ["Gun"] = {
+            Z = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},
+            X = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},
+        },
+        ["Fruit"] = {
+            Z = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},
+            X = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},
+            C = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},
+            V = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},
+            F = {Enabled = true, Hold = 0.05, WaitNextSkill = 0.6},
+        },
+    },
+}
+_G.SupperFixLag = true
+_G["Auto Gacha & Store Fruit"] = true
 
-        if success then
-            local data = HttpService:JSONDecode(response)
-            for _, server in pairs(data.data) do
-                if server.playing < server.maxPlayers and server.id ~= game.JobId then
-                    table.insert(servers, server.id)
-                end
-            end
-            cursor = data.nextPageCursor
-        else
-            print("Failed to fetch server list. Retrying...")
-            break
-        end
-    until not cursor
-    return servers
-end
-
--- Function to hop to a new server
-local function hopServer()
-    local servers = getServerList()
-    if #servers > 0 then
-        local serverId = servers[math.random(1, #servers)] -- Select a random server
-        print("Hopping to a new server: " .. serverId)
-        TeleportService:TeleportToPlaceInstance(PlaceId, serverId)
-    else
-        print("No new servers found. Retrying in " .. hopInterval .. " seconds...")
-    end
-end
-
--- Main loop
-while true do
-    hopServer()
-    wait(hopInterval) -- Wait before hopping again
-end
+loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/fac6dbd013c78163f8061ce11b2c1330.lua"))()
